@@ -21,9 +21,17 @@ class SaleOrderService(Component):
         input_param=Datamodel("sale.order.param"),
     )
     def create(self, params):
+        # Find partner
+        compostix_partner = self.env["res.partner"].browse(params.partner_id)
+        if compostix_partner.parent_id:
+            partner = compostix_partner.parent_id
+        else:
+            partner = compostix_partner            
+
         # Sale order creation
         values = {
-            "partner_id": self.env["res.partner"].browse(params.partner_id).id,
+            "partner_id": partner.id,
+            "partner_shipping_id": compostix_partner.id
         }
         values = self.env["sale.order"].play_onchanges(values, ["partner_id"])
         order = self.env["sale.order"].create(values)
